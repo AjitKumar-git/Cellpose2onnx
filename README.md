@@ -2,21 +2,23 @@
 
 Adapted from arivis V4D
 
-Cellpose2onnx is a tool for converting Cellpose models to the ONNX format. This conversion allows you to use the Cellpose models in various frameworks and environments that support ONNX, enhancing interoperability and deployment options.
+Cellpose2onnx is a tool for converting Cellpose models to the ONNX format. This conversion allows you to use Cellpose models in various frameworks and environments that support ONNX, enhancing interoperability and deployment options.
 
 ## Features
 
 - Convert individual Cellpose models to ONNX format.
 - Convert all available Cellpose models to ONNX format.
-- Easy-to-use graphical user interface (GUI) with a black theme.
-- Support for specifying mean diameter for nuclei-based and other models.
+- Command line interface (CLI) and easy-to-use graphical user interface (GUI).
+- Default ONNX opset version 18 for compatibility with modern PyTorch and ONNX runtime releases.
+- Input validation and status reporting.
 
 ## Requirements
 
 - Python 3.x
 - Cellpose
 - PyTorch
-- tkinter
+- ONNX and ONNXScript
+- tkinter (for GUI)
 
 ## Installation
 
@@ -30,7 +32,7 @@ cd Cellpose2onnx
 2. Install the required dependencies:
 
 ```sh
-pip install cellpose torch tkinter
+pip install -r requirements.txt
 ```
 
 ## Usage
@@ -43,7 +45,7 @@ pip install cellpose torch tkinter
 python cellpose2onnx_gui.py
 ```
 
-2. Use the GUI to select the model path, output directory, and mean diameter. Click the "Convert" button to start the conversion.
+2. Use the GUI to select the model path, output directory, and mean diameter (default `30.0`). Click the "Convert" button to start the conversion.
 
 ### Using the Command Line
 
@@ -57,6 +59,20 @@ python cellpose2onnx.py --model_path /path/to/your/model --output_directory /pat
 
 ```sh
 python cellpose2onnx.py --output_directory /path/to/output
+```
+
+3. Optional arguments:
+
+```sh
+python cellpose2onnx.py --help
+```
+
+## Running Tests
+
+To run the test suite:
+
+```sh
+pytest
 ```
 
 ## GUI Screenshot
