@@ -1,0 +1,4 @@
+cellpose>=2.0.0
+torch>=1.6.0
+onnx>=1.12.0
+onnxscript>=0.1.0
