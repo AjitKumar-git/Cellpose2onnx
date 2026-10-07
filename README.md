@@ -11,6 +11,7 @@ Cellpose2onnx is a tool for converting Cellpose models to the ONNX format. This 
 - Command line interface (CLI) and easy-to-use graphical user interface (GUI).
 - Default ONNX opset version 18 for compatibility with modern PyTorch and ONNX runtime releases.
 - Input validation and status reporting.
+- Example usage script demonstrating conversion and inference with ONNX Runtime.
 
 ## Requirements
 
@@ -18,6 +19,7 @@ Cellpose2onnx is a tool for converting Cellpose models to the ONNX format. This 
 - Cellpose
 - PyTorch
 - ONNX and ONNXScript
+- ONNX Runtime
 - tkinter (for GUI)
 
 ## Installation
@@ -36,6 +38,14 @@ pip install -r requirements.txt
 ```
 
 ## Usage
+
+### Using the Example Usage Script
+
+To convert a model and run an ONNX inference sample:
+
+```sh
+python example_usage.py
+```
 
 ### Using the GUI
 
@@ -65,6 +75,24 @@ python cellpose2onnx.py --output_directory /path/to/output
 
 ```sh
 python cellpose2onnx.py --help
+```
+
+### Running Inference with ONNX Runtime
+
+Once converted, ONNX models can be loaded into ONNX Runtime:
+
+```python
+import numpy as np
+import onnxruntime as ort
+
+session = ort.InferenceSession("path/to/model.onnx")
+input_name = session.get_inputs()[0].name
+
+# Cellpose model inputs expect [batch_size, 2, height, width] float32 arrays
+dummy_input = np.random.randn(1, 2, 224, 224).astype(np.float32)
+
+outputs = session.run(None, {input_name: dummy_input})
+flows_and_probabilities, style_vector = outputs[0], outputs[1]
 ```
 
 ## Running Tests

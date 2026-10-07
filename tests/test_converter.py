@@ -1,10 +1,13 @@
 import os
 import tempfile
 import pytest
+import numpy as np
+import onnxruntime as ort
 import torch
 import cellpose.resnet_torch as cp_net
 import cellpose2onnx
 import cellpose2onnx_gui
+import example_usage
 
 
 @pytest.fixture
@@ -16,7 +19,7 @@ def dummy_model_file(tmp_path):
     return str(model_path)
 
 
-def test_convert_to_onnx_success(dummy_model_file, tmp_path):
+def test_convert_to_onnx_and_inference(dummy_model_file, tmp_path):
     out_dir = str(tmp_path / "onnx_out")
     onnx_path = cellpose2onnx.convert_to_ONNX(
         model_path=dummy_model_file,
@@ -28,6 +31,15 @@ def test_convert_to_onnx_success(dummy_model_file, tmp_path):
 
     assert os.path.exists(onnx_path)
     assert onnx_path.endswith(".onnx")
+
+    session = ort.InferenceSession(onnx_path)
+    input_name = session.get_inputs()[0].name
+    dummy_input = np.random.randn(1, 2, 224, 224).astype(np.float32)
+
+    outputs = session.run(None, {input_name: dummy_input})
+    assert len(outputs) == 2
+    assert outputs[0].shape == (1, 3, 224, 224)
+    assert outputs[1].shape == (1, 256)
 
 
 def test_cli_argument_validation(dummy_model_file, tmp_path, monkeypatch):
@@ -48,7 +60,6 @@ def test_cli_argument_validation(dummy_model_file, tmp_path, monkeypatch):
 
 
 def test_gui_start_conversion_validation(tmp_path, monkeypatch):
-    # Mock messagebox in cellpose2onnx_gui to prevent Tkinter window display initialization in headless test environment
     dummy_calls = []
 
     def mock_showerror(title, message):
