@@ -36,7 +36,7 @@ def test_convert_to_onnx_and_inference(dummy_model_file, tmp_path):
     input_name = session.get_inputs()[0].name
     dummy_input = np.random.randn(1, 2, 224, 224).astype(np.float32)
 
-    outputs = session.run(None, {input_name: dummy_input})
+    outputs = session.run(["output", "style"], {input_name: dummy_input})
     assert len(outputs) == 2
     assert outputs[0].shape == (1, 3, 224, 224)
     assert outputs[1].shape == (1, 256)
@@ -49,7 +49,7 @@ def test_convert_all_models_mocked(dummy_model_file, tmp_path, monkeypatch):
     mock_names = ["cyto", "cyto3", "nuclei", "tissuenet", "livecell"]
     monkeypatch.setattr("cellpose.models.MODEL_NAMES", mock_names)
     monkeypatch.setattr("cellpose.models.get_user_models", lambda: [])
-    monkeypatch.setattr("cellpose.models.model_path", lambda name, idx, torch: dummy_model_file)
+    monkeypatch.setattr("cellpose.models.model_path", lambda *args, **kwargs: dummy_model_file)
 
     converted_paths = []
     def mock_convert_to_onnx(model_path, output_directory, diam_mean, opset_version=18):

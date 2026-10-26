@@ -1,4 +1,5 @@
 import argparse
+import inspect
 import os
 import cellpose.models as cp_model
 import cellpose.resnet_torch as cp_net
@@ -50,6 +51,14 @@ def convert_to_ONNX(
     return onnx_model_path
 
 
+def _get_model_path(model_string: str, index: int) -> str:
+    """Helper to call cp_model.model_path handling signature differences across cellpose versions."""
+    sig = inspect.signature(cp_model.model_path)
+    if "use_torch" in sig.parameters:
+        return cp_model.model_path(model_string, index, True)
+    return cp_model.model_path(model_string, index)
+
+
 def convert_all_models(output_directory: str, opset_version: int = 18):
     """Converts all built-in and user Cellpose models to ONNX format."""
     os.makedirs(output_directory, exist_ok=True)
@@ -72,7 +81,7 @@ def convert_all_models(output_directory: str, opset_version: int = 18):
             model_range = range(1)
 
         model_paths = [
-            cp_model.model_path(model_string, j, True) for j in model_range
+            _get_model_path(model_string, j) for j in model_range
         ]
 
         for model_path in model_paths:
