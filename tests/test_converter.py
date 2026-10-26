@@ -42,6 +42,28 @@ def test_convert_to_onnx_and_inference(dummy_model_file, tmp_path):
     assert outputs[1].shape == (1, 256)
 
 
+def test_convert_all_models_mocked(dummy_model_file, tmp_path, monkeypatch):
+    out_dir = str(tmp_path / "all_models_out")
+
+    # Mock MODEL_NAMES to include various built-in models
+    mock_names = ["cyto", "cyto3", "nuclei", "tissuenet", "livecell"]
+    monkeypatch.setattr("cellpose.models.MODEL_NAMES", mock_names)
+    monkeypatch.setattr("cellpose.models.get_user_models", lambda: [])
+    monkeypatch.setattr("cellpose.models.model_path", lambda name, idx, torch: dummy_model_file)
+
+    converted_paths = []
+    def mock_convert_to_onnx(model_path, output_directory, diam_mean, opset_version=18):
+        converted_paths.append((model_path, diam_mean))
+        return os.path.join(output_directory, "dummy.onnx")
+
+    monkeypatch.setattr("cellpose2onnx.convert_to_ONNX", mock_convert_to_onnx)
+
+    cellpose2onnx.convert_all_models(out_dir)
+
+    # 4 models for cyto, cyto3, nuclei (3*4 = 12), and 1 model for tissuenet, livecell (2*1 = 2) -> total 14
+    assert len(converted_paths) == 14
+
+
 def test_cli_argument_validation(dummy_model_file, tmp_path, monkeypatch):
     out_dir = str(tmp_path / "cli_out")
     test_args = [
